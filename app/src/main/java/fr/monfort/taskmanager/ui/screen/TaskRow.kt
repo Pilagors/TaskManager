@@ -10,13 +10,14 @@ import fr.monfort.taskmanager.data.model.Task
 
 @Composable
 fun TaskRow(
-    task: Task,
-    level: Int
+    task: Task
 ) {
     Row(
-        modifier = Modifier
-            .padding(start = (level * 16).dp, top = 4.dp, bottom = 4.dp)
+
     ) {
-        Text(task.title)
+        Text(
+            text = task.title,
+            modifier = Modifier.padding(12.dp)
+        )
     }
 }
