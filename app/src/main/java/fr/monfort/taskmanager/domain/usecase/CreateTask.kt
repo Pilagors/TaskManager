@@ -7,14 +7,16 @@ import java.util.UUID
 class CreateTask (
     private val repository: TaskRepository
 ) {
-    fun execute (title: String, parentId: String? = null) {
+    fun execute (title: String, parentId: String? = null) : String {
+        val id : String = UUID.randomUUID().toString()
         repository.addTask(
             Task(
-                id = UUID.randomUUID().toString(),
+                id = id,
                 title = title,
                 parentId = parentId,
                 order = 0
             )
         )
+        return id
     }
 }
