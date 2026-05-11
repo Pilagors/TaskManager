@@ -7,11 +7,8 @@ import fr.monfort.taskmanager.domain.usecase.TaskTreeBuilder
 
 @Composable
 fun HomeScreen(repository: TaskRepository) {
-    val tasks = remember { repository.getAllTasks() }
+    val tasks = repository.getAllTasks()
+    val tree = TaskTreeBuilder().build(tasks, null)
 
-    val tree = remember(tasks) {
-        TaskTreeBuilder().build(tasks, null)
-    }
-
-    TaskTreeView(nodes = tree, level = 0)
+    TaskTreeView(nodes = tree, level = 0, repository = repository)
 }

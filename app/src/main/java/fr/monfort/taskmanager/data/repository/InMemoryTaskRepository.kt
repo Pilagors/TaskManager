@@ -1,11 +1,12 @@
 package fr.monfort.taskmanager.data.repository
 
+import androidx.compose.runtime.mutableStateListOf
 import fr.monfort.taskmanager.data.model.Task
 import fr.monfort.taskmanager.data.model.TaskNode
 import fr.monfort.taskmanager.domain.usecase.TaskTreeBuilder
 
 class InMemoryTaskRepository : TaskRepository {
-    private val tasks = mutableListOf<Task>()
+    private val tasks = mutableStateListOf<Task>()
     private val treeBuilder = TaskTreeBuilder()
 
     override fun getAllTasks(): List<Task> {

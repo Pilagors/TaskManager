@@ -10,11 +10,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import fr.monfort.taskmanager.data.model.TaskNode
+import fr.monfort.taskmanager.data.repository.TaskRepository
 
 @Composable
 fun TaskTreeView(
     nodes: List<TaskNode>,
-    level: Int
+    level: Int,
+    repository: TaskRepository
 ) {
     Column() {
         nodes.forEach { node ->
@@ -33,12 +35,13 @@ fun TaskTreeView(
                     end = 16.dp
                 )
             ) {
-                TaskRow(task = node.task)
+                TaskRow(task = node.task, repository = repository)
 
                 if (node.children.isNotEmpty()) {
                     TaskTreeView(
                         nodes = node.children,
-                        level = level + 1
+                        level = level + 1,
+                        repository = repository
                     )
                 }
             }
