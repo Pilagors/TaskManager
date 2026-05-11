@@ -13,6 +13,8 @@ interface TaskRepository {
 
     fun updateTask(task: Task)
 
+    fun updateTitle(taskId: String, newTitle: String)
+
     fun deleteTask(taskId: String)
 
     fun moveTask(taskId: String, newParentId: String?, newOrder: Int)

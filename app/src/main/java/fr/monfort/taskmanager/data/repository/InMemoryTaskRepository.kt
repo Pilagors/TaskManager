@@ -35,6 +35,11 @@ class InMemoryTaskRepository : TaskRepository {
         if (index != -1) tasks[index] = task
     }
 
+    override fun updateTitle(taskId: String, newTitle: String) {
+        val task = getTaskById(taskId) ?: return
+        updateTask(task.copy(title = newTitle))
+    }
+
     override fun moveTask(taskId: String, newParentId: String?, newOrder: Int) {
         val task = getTaskById(taskId) ?: return
 
