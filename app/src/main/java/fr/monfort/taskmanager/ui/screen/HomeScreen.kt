@@ -143,7 +143,8 @@ class DragState {
     var dragOffsetY by mutableStateOf(0f)
     var currentTarget by mutableStateOf<DropTarget?>(null)
         private set
-    val itemBounds = mutableStateMapOf<String, Rect>()
+    data class ItemInfo(val bounds: Rect, val hasChildren: Boolean)
+    val itemBounds = mutableStateMapOf<String, ItemInfo>()
 
     val isDragging: Boolean get() = draggingId != null
 
@@ -167,18 +168,22 @@ class DragState {
 
     private fun recomputeTarget() {
         val draggedId = draggingId ?: return
-        val hit = itemBounds.entries.firstOrNull { (id, rect) ->
-            id != draggedId && pointerY in rect.top..rect.bottom
+        val hit = itemBounds.entries.firstOrNull { (id, info) ->
+            id != draggedId && pointerY in info.bounds.top..info.bounds.bottom
         } ?: run {
             currentTarget = null
             return
         }
-        val (targetId, rect) = hit
-        val relativeY = (pointerY - rect.top) / rect.height
-        val zone = when {
-            relativeY < 0.25f -> DropZone.Before
-            relativeY > 0.75f -> DropZone.After
-            else -> DropZone.Inside
+        val (targetId, info) = hit
+        val relativeY = (pointerY - info.bounds.top) / info.bounds.height
+        val zone = if (info.hasChildren) {
+            if (relativeY < 0.25f) DropZone.Before else DropZone.Inside
+        } else {
+            when {
+                relativeY < 0.25f -> DropZone.Before
+                relativeY > 0.75f -> DropZone.After
+                else -> DropZone.Inside
+            }
         }
         currentTarget = DropTarget(targetId, zone)
     }
@@ -210,7 +215,7 @@ fun TaskRowFlat(
         modifier = Modifier
             .onGloballyPositioned { coords ->
                 val bounds = coords.boundsInWindow()
-                dragState.itemBounds[flatTask.id] = bounds
+                dragState.itemBounds[flatTask.id] = DragState.ItemInfo(bounds, flatTask.hasChildren)
                 rowTopInWindow = bounds.top
             }
             .graphicsLayer {
