@@ -4,35 +4,39 @@ import androidx.compose.runtime.mutableStateListOf
 import fr.monfort.taskmanager.data.model.Task
 import fr.monfort.taskmanager.data.model.TaskNode
 import fr.monfort.taskmanager.domain.usecase.TaskTreeBuilder
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
 class InMemoryTaskRepository : TaskRepository {
-    private val tasks = mutableStateListOf<Task>()
+    private val _tasks = MutableStateFlow<List<Task>>(emptyList())
+    override val tasks : StateFlow<List<Task>> = _tasks.asStateFlow()
     private val treeBuilder = TaskTreeBuilder()
 
-    override fun getAllTasks(): List<Task> {
-        return tasks
-    }
-
     override fun getChildren(parentId: String?): List<Task> {
-        return tasks.filter { it.parentId == parentId }
-                    .sortedBy { it.order }
+        return _tasks.value.filter { it.parentId == parentId }
     }
 
     override fun getTaskById(id: String): Task? {
-        return tasks.find { it.id == id }
+        return _tasks.value.find { it.id == id }
     }
 
     override fun addTask(task: Task) {
-        tasks.add(task)
+        _tasks.update { it + task}
     }
 
     override fun deleteTask(taskId: String) {
-        tasks.removeAll { it.id == taskId}
+        _tasks.update { current ->
+            val toDelete = collectDescendants(current, taskId) + taskId
+            current.filterNot { it.id in toDelete }
+        }
     }
 
     override fun updateTask(task: Task) {
-        val index = tasks.indexOfFirst { it.id == task.id }
-        if (index != -1) tasks[index] = task
+        _tasks.update { current ->
+            current.map { if (it.id == task.id) task else it }
+        }
     }
 
     override fun updateTitle(taskId: String, newTitle: String) {
@@ -51,7 +55,18 @@ class InMemoryTaskRepository : TaskRepository {
         )
     }
 
-    fun getTaskTree(): List<TaskNode> {
-        return treeBuilder.build(tasks, null)
+    private fun collectDescendants(all: List<Task>, rootId: String): Set<String> {
+        val result = mutableSetOf<String>()
+        val queue = ArrayDeque<String>().apply { add(rootId) }
+
+        while(queue.isNotEmpty()) {
+            val current = queue.removeFirst()
+            all.filter { it.parentId == current }.forEach {
+                result.add(it.id)
+                queue.add(it.id)
+            }
+        }
+
+        return result
     }
 }

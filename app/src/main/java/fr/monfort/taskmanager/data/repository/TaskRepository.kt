@@ -1,9 +1,10 @@
 package fr.monfort.taskmanager.data.repository
 
 import fr.monfort.taskmanager.data.model.Task
+import kotlinx.coroutines.flow.StateFlow
 
 interface TaskRepository {
-    fun getAllTasks(): List<Task>
+    val tasks: StateFlow<List<Task>>
 
     fun getTaskById(id: String): Task?
 
