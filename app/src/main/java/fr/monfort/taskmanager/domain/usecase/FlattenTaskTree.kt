@@ -7,7 +7,8 @@ data class FlatTask(
     val title: String,
     val parentId: String?,
     val level: Int,
-    val hasChildren: Boolean
+    val hasChildren: Boolean,
+    val order: Int
 )
 
 class FlattenTaskTree {
@@ -19,7 +20,8 @@ class FlattenTaskTree {
                     title = node.task.title,
                     parentId = node.task.parentId,
                     level = level,
-                    hasChildren = node.children.isNotEmpty()
+                    hasChildren = node.children.isNotEmpty(),
+                    node.task.order
                 )
             )
 
