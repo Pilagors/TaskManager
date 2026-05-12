@@ -29,3 +29,20 @@ class FlattenTaskTree {
         }
     }
 }
+
+fun List<FlatTask>.descendantIdsOf(id: String): Set<String> {
+    val index = indexOfFirst { it.id == id }
+
+    if (index == -1) return emptySet()
+
+    val baseLevel = this[index].level
+    val result = mutableSetOf<String>()
+    var i = index + 1
+
+    while (i < size && this[i].level > baseLevel) {
+        result.add(this[i].id)
+        i++
+    }
+
+    return result
+}
